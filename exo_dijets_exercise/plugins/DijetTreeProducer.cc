@@ -9,12 +9,11 @@
 #include <vector>
 #include <cassert>
 #include "TFile.h"
-#include "TBranch.h"
 #include "TH1D.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
 
-#include "KKousour/CMGAnalysis/plugins/DijetTreeProducer.h"
+#include "cmsdas2014/EXODijetsExercise/plugins/DijetTreeProducer.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -22,11 +21,9 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/JetReco/interface/JetCollection.h"
-#include "DataFormats/JetReco/interface/GenJetCollection.h"
 #include "DataFormats/METReco/interface/MET.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 using namespace std;

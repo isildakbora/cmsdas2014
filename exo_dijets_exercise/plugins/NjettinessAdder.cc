@@ -1,5 +1,5 @@
-#include "KKousour/CMGAnalysis/plugins/NjettinessAdder.h"
-#include "KKousour/CMGAnalysis/interface/Njettiness.hh"
+#include "cmsdas2014/EXODijetsExercise/plugins/NjettinessAdder.h"
+#include "cmsdas2014/EXODijetsExercise/interface/Njettiness.hh"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
