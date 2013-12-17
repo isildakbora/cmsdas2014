@@ -1,9 +1,9 @@
 #!usr/bin/python
 import sys, getopt
 import ROOT
-from ROOT import TFile, TTree, TH1F, TCanvas
+from ROOT import TFile, TH1F, TCanvas
 from ROOT import gROOT, gPad 
-from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf
+from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf, RooWorkspace
 from setTDRStyle import setTDRStyle
 
 mass = 0
@@ -19,11 +19,12 @@ setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-inf = TFile.Open('root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/dijetTree_RS'+str(mass)+'.root')
-tr  = inf.Get('dijets/events')
-h   = TH1F('h','h',210,800,5000)
+filename = 'dijetHisto_RS'+str(mass)+'_signal.root'
 
-x = RooRealVar('mjj','mjj',800,5000)
+inf = TFile.Open(filename)
+h   = inf.Get('h_mjj')
+h.Rebin(20)
+x = RooRealVar('mjj','mjj',900,4500)
 
 m = RooRealVar('mean','mean',float(mass),float(mass)-200,float(mass)+200)
 s = RooRealVar('sigma','sigma',0.1*float(mass),0,10000)
@@ -40,9 +41,8 @@ fsig= RooRealVar('fsig','fsig',0.5,0.,1.)
 model = RooAddPdf('model','model',sig,bkg,fsig)
 
 can = TCanvas('can_Mjj'+str(mass),'can_Mjj'+str(mass),900,600)
-tr.Draw('mjj>>h','jetElf[0]<0.7 && jetElf[1]<0.7 && jetMuf[0]<0.7 && jetMuf[1]<0.7 && jetPt[1]>40 && dEtajj<1.3')
 h.Draw()
-#gPad.SetLogy() 
+gPad.SetLogy() 
 
 roohist = RooDataHist('roohist','roohist',RooArgList(x),h)
 
@@ -54,6 +54,11 @@ model.plotOn(frame)
 model.plotOn(frame,RooFit.Components('bkg'),RooFit.LineColor(ROOT.kRed),RooFit.LineWidth(2),RooFit.LineStyle(ROOT.kDashed))
 frame.Draw('same')
 
+w = RooWorkspace('w','workspace')
+getattr(w,'import')(model)
+getattr(w,'import')(roohist)  
+w.Print()
+w.writeToFile('RS'+str(mass)+'_workspace.root')
 
 #----- keep the GUI alive ------------
 if __name__ == '__main__':

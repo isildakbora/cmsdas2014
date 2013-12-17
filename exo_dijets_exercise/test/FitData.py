@@ -3,7 +3,7 @@ import sys, getopt
 import ROOT
 from ROOT import TFile, TH1F, TCanvas, TPad
 from ROOT import gROOT, gPad 
-from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList, RooFit, RooGenericPdf
+from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList, RooFit, RooGenericPdf, RooWorkspace
 from setTDRStyle import setTDRStyle
 
 applySub = False
@@ -19,16 +19,13 @@ setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-if (applySub == True):
-  filename = 'dijetHisto_data_signal_sub.root'
-else:
-  filename = 'dijetHisto_data_signal.root'
+filename = 'dijetHisto_data_signal.root'
 
 inf = TFile.Open(filename)
 h   = inf.Get('h_mjj')
 
-x = RooRealVar('mjj','mjj',900,4000)
-NBINS = 62
+x = RooRealVar('mjj','mjj',900,4500)
+NBINS = 180
 p1 = RooRealVar('p1','p1',5,0,20)
 p2 = RooRealVar('p2','p2',5,0,20)
 p3 = RooRealVar('p3','p3',0.1,0,1)
@@ -73,6 +70,11 @@ frame2.GetYaxis().SetTitle('(Data-Fit)/Error')
 frame2.GetXaxis().SetTitle('m_{jj} (GeV)')
 frame2.Draw();
 
+w = RooWorkspace('w','workspace')
+getattr(w,'import')(model)
+getattr(w,'import')(roohist)  
+w.Print()
+w.writeToFile('data_workspace.root')
 
 #----- keep the GUI alive ------------
 if __name__ == '__main__':

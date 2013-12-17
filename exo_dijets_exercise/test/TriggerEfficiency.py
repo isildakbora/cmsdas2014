@@ -23,8 +23,8 @@ setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-infRef = TFile.Open('dijetHisto_JetA_ref.root')
-infSig = TFile.Open('dijetHisto_JetA_refSig.root')
+infRef = TFile.Open('dijetHisto_data_ref.root')
+infSig = TFile.Open('dijetHisto_data_refSig.root')
 
 hRef = TH1F(infRef.Get('h_mjj'))
 hRef.Rebin(rebin)

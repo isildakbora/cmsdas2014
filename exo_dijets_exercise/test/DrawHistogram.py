@@ -32,12 +32,12 @@ setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-fileNames = ['QCD250','QCD500','QCD1000','RS2000','data']
-xsections = [2.76e+5,8426.,204.,4.083e-3,1.]
-colorF    = [ROOT.kBlue-10,ROOT.kBlue-9,ROOT.kBlue-8,ROOT.kWhite,ROOT.kBlack]
-colorL    = [ROOT.kBlack,ROOT.kBlack,ROOT.kBlack,ROOT.kRed,ROOT.kBlack]
+fileNames = ['QCD500','QCD1000','RS2000','data']
+xsections = [8426.,204.,4.083e-3,1.]
+colorF    = [ROOT.kBlue-9,ROOT.kBlue-8,ROOT.kWhite,ROOT.kBlack]
+colorL    = [ROOT.kBlack,ROOT.kBlack,ROOT.kRed,ROOT.kBlack]
 hist      = []
-LUMI      = 19000.
+LUMI      = 19700.
 #---- open the files --------------------
 i_f = 0
 for f in fileNames:
@@ -46,7 +46,7 @@ for f in fileNames:
   
   Nev = inf.Get('TriggerPass').GetBinContent(1)
   wt = 1.0
-  if i_f < 4:
+  if i_f < 3:
     wt = LUMI*xsections[i_f]/Nev
   
   h = inf.Get('h_'+var)
@@ -60,39 +60,36 @@ for f in fileNames:
    
   i_f += 1
 
-NQCD = hist[0].Integral()+hist[1].Integral()+hist[2].Integral()
-NDAT = hist[4].Integral()
+NQCD = hist[0].Integral()+hist[1].Integral()
+NDAT = hist[3].Integral()
 kFactor = NDAT/NQCD
 print kFactor
 
 hist[0].Scale(kFactor)
 hist[1].Scale(kFactor)
-hist[2].Scale(kFactor)
 
 histQCD = hist[0].Clone('histQCD')
 histQCD.Add(hist[1])
-histQCD.Add(hist[2]) 
 
 hsQCD = THStack('QCD','QCD')
 
 hsQCD.Add(hist[0])
 hsQCD.Add(hist[1])
-hsQCD.Add(hist[2])
 
 #----- Drawing -----------------------
 can = TCanvas('can_'+var,'can_'+var,900,600)
 if logy:
   gPad.SetLogy()
-hAux = hist[4].Clone('aux')
+hAux = hist[3].Clone('aux')
 hAux.Reset()
 hAux.GetXaxis().SetRangeUser(xmin,xmax)
 hAux.GetXaxis().SetTitle(xtitle)
-hAux.SetMaximum(1.2*TMath.Max(hist[4].GetBinContent(hist[4].GetMaximumBin()),histQCD.GetBinContent(histQCD.GetMaximumBin())))
-hAux.SetMinimum(0.5)
+hAux.SetMaximum(1.2*TMath.Max(hist[3].GetBinContent(hist[3].GetMaximumBin()),histQCD.GetBinContent(histQCD.GetMaximumBin())))
+hAux.SetMinimum(0.01)
 hAux.Draw()
 hsQCD.Draw('same hist')
-hist[4].Draw('same E')
-hist[3].Draw('same hist')
+hist[3].Draw('same E')
+hist[2].Draw('same hist')
 gPad.RedrawAxis()
     
 #----- keep the GUI alive ------------
