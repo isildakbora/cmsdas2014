@@ -13,7 +13,7 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
-#include "cmsdas2014/EXODijetsExercise/plugins/DijetTreeProducer.h"
+#include "cmsdas2014/exo_dijets_exercise/plugins/DijetTreeProducer.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
