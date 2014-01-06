@@ -1,5 +1,5 @@
-#include "cmsdas2014/EXODijetsExercise/plugins/NjettinessAdder.h"
-#include "cmsdas2014/EXODijetsExercise/interface/Njettiness.hh"
+#include "cmsdas2014/exo_dijets_exercise/plugins/NjettinessAdder.h"
+#include "cmsdas2014/exo_dijets_exercise/interface/Njettiness.hh"
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
