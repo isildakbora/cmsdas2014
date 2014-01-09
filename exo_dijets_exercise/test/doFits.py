@@ -17,11 +17,15 @@ parser.add_option("-m","--mass",action="store",type="int",dest="mass",default=20
 parser.add_option("--lumi",action="store",type="float",dest="lumi",default=19.7)
 parser.add_option("--sigEff",action="store",type="float",dest="sigEff",default=0.2941)
 parser.add_option("--sigXS",action="store",type="float",dest="sigXS",default=0.004083e3)
+
+parser.add_option("--useSub",action="store_true",default=False,dest="useSub")
+
 (options, args) = parser.parse_args()
 
 mass = options.mass
 fitSig = options.fitSig
 fitDat = options.fitDat
+useSub = options.useSub
 
 #opts, args = getopt.getopt(sys.argv[1:],'m:s:d',['mass=','figSig=','fitDat='])
 #
@@ -40,10 +44,18 @@ gROOT.SetStyle('tdrStyle')
 
 # -----------------------------------------
 # get histograms
-filenameSig = 'histos/dijetHisto_RS'+str(mass)+'_signal.root'
-filenameDat = 'histos/dijetHisto_data_signal.root'
+## ---- CERN -------
+PATH = 'root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/'
+## ---- FNAL -------
+# PATH = '/eos/uscms/store/user/cmsdas/2014/EXODijetsLE/'
 
-inputHistName = 'h_mjj';
+filenameSig = PATH+'dijetHisto_RS'+str(mass)+'_signal.root'
+filenameDat = PATH+'dijetHisto_data_signal.root'
+
+inputHistName = 'h_mjj'
+
+if useSub:
+ inputHistName = 'h_sub_mjj'
 
 infSig = TFile.Open(filenameSig)
 hSig   = infSig.Get(inputHistName)
@@ -109,14 +121,14 @@ if fitDat:
     # plot background
     canB = TCanvas('can_Mjj_Data','can_Mjj_Data',900,600)
     gPad.SetLogy() 
-    canB.cd(1).SetBottomMargin(0.4);
+    canB.cd(1).SetBottomMargin(0.4)
 
     frame1 = x.frame()
-    frame2 = x.frame();
+    frame2 = x.frame()
     roohistBkg.plotOn(frame1,RooFit.Binning(NBINS))
     background.plotOn(frame1)
-    hpull = frame1.pullHist();
-    frame2.addPlotable(hpull,'p');
+    hpull = frame1.pullHist()
+    frame2.addPlotable(hpull,'p')
 
     frame1.SetMinimum(0.5)
     frame1.GetXaxis().SetTitle('')
@@ -124,12 +136,12 @@ if fitDat:
     frame1.GetYaxis().SetTickLength(0.06)
     frame1.Draw()
 
-    pad = TPad('pad','pad',0.,0.,1.,1.);
-    pad.SetTopMargin(0.6);
-    pad.SetFillColor(0);
-    pad.SetFillStyle(0);
-    pad.Draw();
-    pad.cd(0);
+    pad = TPad('pad','pad',0.,0.,1.,1.)
+    pad.SetTopMargin(0.6)
+    pad.SetFillColor(0)
+    pad.SetFillStyle(0)
+    pad.Draw()
+    pad.cd(0)
     frame2.SetMinimum(-5)
     frame2.SetMaximum(5)
     frame2.GetYaxis().SetNdivisions(505)
@@ -149,8 +161,13 @@ if fitSig and fitDat:
     
     # -----------------------------------------
     # write everything to a workspace to make a datacard
-    dcFN = 'RS'+str(mass)+'_datacard.txt';
-    wsFN = 'RS'+str(mass)+'_workspace.root';
+    dcFN = 'RS'+str(mass)+'_datacard.txt'
+    wsFN = 'RS'+str(mass)+'_workspace.root'
+    
+    if useSub:
+      dcFN = 'RS'+str(mass)+'_sub_datacard.txt'
+      wsFN = 'RS'+str(mass)+'_sub_workspace.root'
+
     nObs = roohistBkg.sumEntries();
     
     w = RooWorkspace('w','workspace')
@@ -162,26 +179,26 @@ if fitSig and fitDat:
     
     # -----------------------------------------
     # write a datacard
-    LUMI = options.lumi;
-    signalCrossSection = options.sigXS;
-    signalEfficiency = options.sigEff;
-    ExpectedSignalRate = signalCrossSection*LUMI*signalEfficiency;
+    LUMI = options.lumi
+    signalCrossSection = options.sigXS
+    signalEfficiency = options.sigEff
+    ExpectedSignalRate = signalCrossSection*LUMI*signalEfficiency
 
-    datacard = open(dcFN,'w');
-    datacard.write('imax 1\n');
-    datacard.write('jmax 1\n');
-    datacard.write('kmax *\n');
-    datacard.write('---------------\n');
-    datacard.write('shapes * * '+wsFN+' w:$PROCESS\n');
-    datacard.write('---------------\n');
-    datacard.write('bin 1\n');    
-    datacard.write('observation '+str(nObs)+'\n');  
-    datacard.write('------------------------------\n');      
-    datacard.write('bin          1          1\n');          
-    datacard.write('process      signal     background\n');          
-    datacard.write('process      0          1\n');          
-    datacard.write('rate         '+str(ExpectedSignalRate)+'         '+str(nObs)+'\n');                  
-    datacard.write('------------------------------\n');      
+    datacard = open(dcFN,'w')
+    datacard.write('imax 1\n')
+    datacard.write('jmax 1\n')
+    datacard.write('kmax *\n')
+    datacard.write('---------------\n')
+    datacard.write('shapes * * '+wsFN+' w:$PROCESS\n')
+    datacard.write('---------------\n')
+    datacard.write('bin 1\n')    
+    datacard.write('observation '+str(nObs)+'\n')
+    datacard.write('------------------------------\n')
+    datacard.write('bin          1          1\n')          
+    datacard.write('process      signal     background\n')
+    datacard.write('process      0          1\n')          
+    datacard.write('rate         '+str(ExpectedSignalRate)+'         '+str(nObs)+'\n')
+    datacard.write('------------------------------\n')      
                         
 #----- keep the GUI alive ------------
 if __name__ == '__main__':
