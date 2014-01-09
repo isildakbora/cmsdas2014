@@ -11,7 +11,12 @@ usage = "usage: %prog [options]"
 parser = optparse.OptionParser(usage)
 parser.add_option("-s","--fitSig",action="store_true",default=False,dest="fitSig")
 parser.add_option("-d","--fitDat",action="store_true",default=False,dest="fitDat")
-parser.add_option("-m","--mass",action="store",type="int",dest="mass",default=0)
+parser.add_option("-m","--mass",action="store",type="int",dest="mass",default=2000)
+
+
+parser.add_option("--lumi",action="store",type="float",dest="lumi",default=19.7)
+parser.add_option("--sigEff",action="store",type="float",dest="sigEff",default=0.2941)
+parser.add_option("--sigXS",action="store",type="float",dest="sigXS",default=0.004083e3)
 (options, args) = parser.parse_args()
 
 mass = options.mass
@@ -35,15 +40,17 @@ gROOT.SetStyle('tdrStyle')
 
 # -----------------------------------------
 # get histograms
-filenameSig = 'dijetHisto_RS'+str(mass)+'_signal.root'
-filenameDat = 'dijetHisto_data_signal.root'
+filenameSig = 'histos/dijetHisto_RS'+str(mass)+'_signal.root'
+filenameDat = 'histos/dijetHisto_data_signal.root'
+
+inputHistName = 'h_mjj';
 
 infSig = TFile.Open(filenameSig)
-hSig   = infSig.Get('h_mjj')
+hSig   = infSig.Get(inputHistName)
 hSig.Rebin(20)
 
 infDat = TFile.Open(filenameDat)
-hDat   = infDat.Get('h_mjj')
+hDat   = infDat.Get(inputHistName)
 #hDat.Rebin(20)
 
 # -----------------------------------------
@@ -82,15 +89,17 @@ if fitSig:
     signal.plotOn(frame,RooFit.Components('bkg'),RooFit.LineColor(ROOT.kRed),RooFit.LineWidth(2),RooFit.LineStyle(ROOT.kDashed))
     frame.Draw('same')
 
+    parsSig = signal.getParameters(roohistSig)
+    parsSig.setAttribAll('Constant', True)
 
 if fitDat: 
 
     # -----------------------------------------
     # define parameters for background
     NBINS = 180
-    p1 = RooRealVar('p1','p1',7,0,10)
-    p2 = RooRealVar('p2','p2',5,0,10)
-    p3 = RooRealVar('p3','p3',0.1,0,5)
+    p1 = RooRealVar('p1','p1',7,1,10)
+    p2 = RooRealVar('p2','p2',5,1,10)
+    p3 = RooRealVar('p3','p3',0.03,0.01,0.07)
 
     background = RooGenericPdf('background','(pow(1-@0/8000,@1)/pow(@0/8000,@2+@3*log(@0/8000)))',RooArgList(x,p1,p2,p3))
     roohistBkg = RooDataHist('roohist','roohist',RooArgList(x),hDat)
@@ -133,26 +142,47 @@ if fitDat:
     frame2.GetXaxis().SetTitle('m_{jj} (GeV)')
     frame2.Draw();
 
+    parsBkg = background.getParameters(roohistBkg)
+    parsBkg.setAttribAll('Constant', True)
 
 if fitSig and fitDat:
     
     # -----------------------------------------
     # write everything to a workspace to make a datacard
+    dcFN = 'RS'+str(mass)+'_datacard.txt';
+    wsFN = 'RS'+str(mass)+'_workspace.root';
+    nObs = roohistBkg.sumEntries();
+    
     w = RooWorkspace('w','workspace')
     getattr(w,'import')(signal)
     getattr(w,'import')(background)
     getattr(w,'import')(roohistBkg,RooFit.Rename("data_obs"))  
     w.Print()
-    w.writeToFile('RS'+str(mass)+'_workspace.root')
+    w.writeToFile(wsFN)
     
     # -----------------------------------------
     # write a datacard
-    LUMI = 19.7;
-    signalCrossSection = 0.004083e3;
-    signalEfficiency = 0.2941;
+    LUMI = options.lumi;
+    signalCrossSection = options.sigXS;
+    signalEfficiency = options.sigEff;
     ExpectedSignalRate = signalCrossSection*LUMI*signalEfficiency;
-    # ... to be continued ...
 
+    datacard = open(dcFN,'w');
+    datacard.write('imax 1\n');
+    datacard.write('jmax 1\n');
+    datacard.write('kmax *\n');
+    datacard.write('---------------\n');
+    datacard.write('shapes * * '+wsFN+' w:$PROCESS\n');
+    datacard.write('---------------\n');
+    datacard.write('bin 1\n');    
+    datacard.write('observation '+str(nObs)+'\n');  
+    datacard.write('------------------------------\n');      
+    datacard.write('bin          1          1\n');          
+    datacard.write('process      signal     background\n');          
+    datacard.write('process      0          1\n');          
+    datacard.write('rate         '+str(ExpectedSignalRate)+'         '+str(nObs)+'\n');                  
+    datacard.write('------------------------------\n');      
+                        
 #----- keep the GUI alive ------------
 if __name__ == '__main__':
   rep = ''
