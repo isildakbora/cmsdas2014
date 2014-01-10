@@ -19,7 +19,12 @@ setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-filename = 'dijetHisto_data_signal.root'
+## ---- CERN -------
+PATH = 'root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/'
+## ---- FNAL -------
+# PATH = '/eos/uscms/store/user/cmsdas/2014/EXODijetsLE/'
+
+filename = PATH+'dijetHisto_data_signal.root'
 
 inf = TFile.Open(filename)
 h   = inf.Get('h_mjj')

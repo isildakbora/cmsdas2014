@@ -3,7 +3,7 @@ import sys, getopt
 import ROOT
 from ROOT import TFile, TH1F, TCanvas, TPad
 from ROOT import gROOT, gPad 
-from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList, RooArgSet,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf, RooWorkspace
+from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList, RooArgSet,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf, RooWorkspace, RooMsgService
 from setTDRStyle import setTDRStyle
 
 import optparse
@@ -14,7 +14,7 @@ parser.add_option("-d","--fitDat",action="store_true",default=False,dest="fitDat
 parser.add_option("-m","--mass",action="store",type="int",dest="mass",default=2000)
 
 
-parser.add_option("--lumi",action="store",type="float",dest="lumi",default=19.7)
+parser.add_option("--lumi",action="store",type="float",dest="lumi",default=19.8)
 parser.add_option("--sigEff",action="store",type="float",dest="sigEff",default=0.2941)
 parser.add_option("--sigXS",action="store",type="float",dest="sigXS",default=0.004083e3)
 
@@ -27,20 +27,14 @@ fitSig = options.fitSig
 fitDat = options.fitDat
 useSub = options.useSub
 
-#opts, args = getopt.getopt(sys.argv[1:],'m:s:d',['mass=','figSig=','fitDat='])
-#
-#for opt, arg in opts:
-#  if opt in ('-m','--mass'):
-#    mass = arg
-#  if opt in ('-s','--fitSig'):
-#    fitSig = True
-#  if opt in ('-d','--fitDat'):
-#    fitDat = True
-    
 gROOT.Reset()
 setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
+
+RooMsgService.instance().setSilentMode(ROOT.kTRUE)
+RooMsgService.instance().setStreamStatus(0,ROOT.kFALSE)
+RooMsgService.instance().setStreamStatus(1,ROOT.kFALSE)
 
 # -----------------------------------------
 # get histograms
@@ -88,9 +82,11 @@ if fitSig:
 
     # -----------------------------------------
     # fit signal
-    canS = TCanvas('can_Mjj'+str(mass),'can_Mjj'+str(mass),900,600)
-    hSig.Draw()
-    gPad.SetLogy() 
+    canSname = 'can_Mjj'+str(mass)
+    if useSub:
+      canSname = 'can_Sub_Mjj'+str(mass)
+    canS = TCanvas(canSname,canSname,900,600)
+    #gPad.SetLogy() 
 
     roohistSig = RooDataHist('roohist','roohist',RooArgList(x),hSig)
 
@@ -99,7 +95,9 @@ if fitSig:
     roohistSig.plotOn(frame)
     signal.plotOn(frame)
     signal.plotOn(frame,RooFit.Components('bkg'),RooFit.LineColor(ROOT.kRed),RooFit.LineWidth(2),RooFit.LineStyle(ROOT.kDashed))
-    frame.Draw('same')
+    frame.GetXaxis().SetRangeUser(900,4500)
+    frame.GetXaxis().SetTitle('m_{jj} (GeV)')
+    frame.Draw()
 
     parsSig = signal.getParameters(roohistSig)
     parsSig.setAttribAll('Constant', True)
@@ -119,7 +117,10 @@ if fitDat:
 
     # -----------------------------------------
     # plot background
-    canB = TCanvas('can_Mjj_Data','can_Mjj_Data',900,600)
+    canBname = 'can_Mjj_Data'
+    if useSub:
+      canBname = 'can_Sub_Mjj_Data'
+    canB = TCanvas(canBname,canBname,900,600)
     gPad.SetLogy() 
     canB.cd(1).SetBottomMargin(0.4)
 
@@ -132,6 +133,8 @@ if fitDat:
 
     frame1.SetMinimum(0.5)
     frame1.GetXaxis().SetTitle('')
+    if useSub:
+      frame1.GetXaxis().SetRangeUser(900,2500)
     frame1.GetXaxis().SetLabelSize(0.0)
     frame1.GetYaxis().SetTickLength(0.06)
     frame1.Draw()
@@ -152,6 +155,8 @@ if fitDat:
     frame2.GetYaxis().SetLabelSize(0.03)
     frame2.GetYaxis().SetTitle('(Data-Fit)/Error')
     frame2.GetXaxis().SetTitle('m_{jj} (GeV)')
+    if useSub:
+      frame2.GetXaxis().SetRangeUser(900,2500)
     frame2.Draw();
 
     parsBkg = background.getParameters(roohistBkg)
