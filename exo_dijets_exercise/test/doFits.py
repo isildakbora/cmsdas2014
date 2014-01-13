@@ -3,7 +3,7 @@ import sys, getopt
 import ROOT
 from ROOT import TFile, TH1F, TCanvas, TPad
 from ROOT import gROOT, gPad 
-from ROOT import RooRealVar, RooDataHist, RooAddPdf, RooPlot, RooArgList, RooArgSet,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf, RooWorkspace, RooMsgService
+from ROOT import RooRealVar, RooDataHist, RooPlot, RooArgList, RooArgSet,  RooBernstein, RooCBShape, RooAddPdf, RooFit, RooGenericPdf, RooWorkspace, RooMsgService
 from setTDRStyle import setTDRStyle
 
 import optparse

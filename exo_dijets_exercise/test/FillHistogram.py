@@ -1,21 +1,31 @@
 #!usr/bin/python
-import sys, getopt
 import ROOT
 from ROOT import TFile, TTree, TH1, TH1F, TCanvas, TMath, gROOT
 from math import *
 
-sample   = ''
-trigger  = ''
+import optparse
+usage = "usage: %prog [options]"
+parser = optparse.OptionParser(usage)
+parser.add_option("--sample",action="store",type="string",dest="sample",default='RS2000')
+parser.add_option("--trigger",action="store",type="string",dest="trigger",default='signal')
 
-opts, args = getopt.getopt(sys.argv[1:],'s:t:',['sample=','trigger='])
+(options, args) = parser.parse_args()
+sample = options.sample
+trigger = options.trigger
 
-for opt, arg in opts:
-  if opt in ('-s','--sample'):
-    sample = arg
-  elif opt in ('-t','--trigger'):
-    trigger = arg
+trigger_options = ['signal','ref','refSig']
+if trigger not in trigger_options:
+  print 'WARNING: the requested trigger option ('+trigger+') does not exist !!!'
+  print 'Available trigger options are: '+str(trigger_options)
+  print 'Forcing the default option: \"signal\"'
+  trigger = 'signal'
 
-inputf  = 'root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/dijetTree_'+sample+'.root'
+## ---- CERN -------
+PATH = 'root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/'
+## ---- FNAL -------
+# PATH = '/eos/uscms/store/user/cmsdas/2014/EXODijetsLE/'
+
+inputf  = PATH+'dijetTree_'+sample+'.root'
 outputf = 'dijetHisto_'+sample+'_'+trigger+'.root'
 
 gROOT.Reset()

@@ -1,30 +1,35 @@
 #!usr/bin/python
-import sys, getopt
 import ROOT
 from ROOT import TFile, TH1F, TCanvas, TMath, TEfficiency, TF1, TLegend, TLine, gROOT, gPad
 from setTDRStyle import setTDRStyle
 
-xmin   = 0.0
-xmax   = 1300.0
-rebin  = 1
+import optparse
+usage = "usage: %prog [options]"
+parser = optparse.OptionParser(usage)
+parser.add_option("--set",action="store",type="string",dest="set",default='data')
+parser.add_option("--xmin",action="store",type="float",dest="xmin",default=500)
+parser.add_option("--xmax",action="store",type="float",dest="xmax",default=1500)
+parser.add_option("--rebin",action="store",type="int",dest="rebin",default=10)
 
-opts, args = getopt.getopt(sys.argv[1:],'x:y:r:',['xmin=','xmax=','rebin='])
+(options, args) = parser.parse_args()
 
-for opt, arg in opts:
-  if opt in ('-x','--xmin'):
-    xmin = float(arg)
-  elif opt in ('-y','--xmax'):
-    xmax = float(arg)
-  elif opt in ('-r','--rebin'):
-    rebin = int(arg)
+set = options.set
+xmin = options.xmin
+xmax = options.xmax
+rebin = options.rebin
 
 gROOT.Reset()
 setTDRStyle()
 gROOT.ForceStyle()
 gROOT.SetStyle('tdrStyle')
 
-infRef = TFile.Open('dijetHisto_data_ref.root')
-infSig = TFile.Open('dijetHisto_data_refSig.root')
+## ---- CERN -------
+PATH = 'root://eoscms//eos/cms/store/cmst3/group/das2014/EXODijetsLE/'
+## ---- FNAL -------
+# PATH = '/eos/uscms/store/user/cmsdas/2014/EXODijetsLE/'
+
+infRef = TFile.Open(PATH+'dijetHisto_'+set+'_ref.root')
+infSig = TFile.Open(PATH+'dijetHisto_'+set+'_refSig.root')
 
 hRef = TH1F(infRef.Get('h_mjj'))
 hRef.Rebin(rebin)
@@ -78,6 +83,8 @@ cut = TLine(x0,gPad.GetFrame().GetY1(),x0,gPad.GetFrame().GetY2())
 cut.SetLineColor(ROOT.kRed)
 cut.SetLineStyle(2)
 cut.Draw()
+
+print '99% efficiency point: '+str(round(x0,1))+' GeV'
 
 #----- keep the GUI alive ------------
 if __name__ == '__main__':
