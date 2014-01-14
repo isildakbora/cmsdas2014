@@ -7,16 +7,16 @@ process.GlobalTag.globaltag = 'START53_V27::All'
 
 process.TFileService=cms.Service("TFileService",fileName=cms.string('dijetTree_QCD.root'))
 ##-------------------- Define the source  ----------------------------
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
 
 process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring('/store/cmst3/group/das2014/EXODijetsLE/test_QCD.root')
 )
 
 #############   Format MessageLogger #################
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
-process.load('cmsdas2013.exo_dijets_exercise.PAT_ca8jets_simple_cff')
+process.load('cmsdas2014.exo_dijets_exercise.PAT_ca8jets_simple_cff')
 
 ##-------------------- User analyzer  --------------------------------
 process.dijets     = cms.EDAnalyzer('DijetTreeProducer',
