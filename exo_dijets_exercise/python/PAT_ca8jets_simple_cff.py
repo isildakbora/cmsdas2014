@@ -112,9 +112,7 @@ ca8Jets = cms.Sequence(
   pfNoPileUpSequence +
   ca8PFJetsCHS + 
   patJetCorrFactorsCA8CHS +
-  patJetsCA8CHS + 
-  #selectedPatJetsCA8CHS +
-  #selectedPatJetsCA8CHSwithNsub + 
+  patJetsCA8CHS +  
   patJetsCA8CHSwithNsub +
   ca8PFJetsCHSpruned +
   patJetCorrFactorsCA8CHSpruned +
